@@ -141,11 +141,8 @@ public class Teleop_Omni_cornerWheels_Devin extends OpMode
 
 
     private DcMotor leftMotorFront = null;
-
     private DcMotor rightMotorFront = null;
-
     private DcMotor rightMotorRear = null;
-
     private DcMotor leftMotorRear = null;
 
     private DcMotor liftMotor = null;
