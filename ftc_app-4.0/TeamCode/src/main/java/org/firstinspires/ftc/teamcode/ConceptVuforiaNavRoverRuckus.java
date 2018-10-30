@@ -92,21 +92,21 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  */
 
 @TeleOp(name="Concept: Vuforia Rover Nav", group ="Concept")
-//@Disabled
-public class ConceptVuforiaNavRoverRuckus extends LinearOpMode {
+    //@Disabled
+    public class ConceptVuforiaNavRoverRuckus extends LinearOpMode {
 
-    /*
-     * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
-     * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
-     * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
-     * web site at https://developer.vuforia.com/license-manager.
-     *
-     * Vuforia license keys are always 380 characters long, and look as if they contain mostly
-     * random data. As an example, here is a example of a fragment of a valid key:
-     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
-     * Once you've obtained a license key, copy the string from the Vuforia web site
-     * and paste it in to your code on the next line, between the double quotes.
-     */
+        /*
+         * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
+         * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
+         * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
+         * web site at https://developer.vuforia.com/license-manager.
+         *
+         * Vuforia license keys are always 380 characters long, and look as if they contain mostly
+         * random data. As an example, here is a example of a fragment of a valid key:
+         *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+         * Once you've obtained a license key, copy the string from the Vuforia web site
+         * and paste it in to your code on the next line, between the double quotes.
+         */
     private static final String VUFORIA_KEY = "Ad3XqrD/////AAjkABmThl3HFoKEsxvMKrNpyf8nd7Av9TGuyjLAUtmMXRp0Lmgg+36yQbFeDi8GNWtR+Fr9BCpXHiuGHNkRHDrxB2j5DTT2sZ0kstKJ9nGVz9+Flf9G0sLWTuwjQgh32pa0v30CiuWC7VrXCH5vdKz2hlCICYvP5F7IuHv2d3xS+wDEP83IqsDFhsxBsPo2ZE+s4+RnojnuUZYW5i+VN+wavosLvpBZ4tXNGRWAGVPrj/FASeSXu9SZQCwyy7pvVJZ0uR/ouSxCVlKk/TKLAr3WFWpyKqBYfEQmemCLe8mSbXmQZJG/7bXg3TNwEjrmcikJ/+HAN81W0R8/sjA5sRTIrQcl0MCS2VIWwO5UX5dTk8jjyx";
 
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
