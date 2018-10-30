@@ -56,11 +56,10 @@ public class Teleop_StraightWheels_TankDrive extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftMotorFront = null;
-    private DcMotor leftMotorMiddle = null;
+    //private DcMotor leftMotorMiddle = null;
     private DcMotor leftMotorRear = null;
 
     private DcMotor rightMotorFront = null;
-    private DcMotor rightMotorMiddle = null;
     private DcMotor rightMotorRear = null;
 
 
@@ -75,11 +74,11 @@ public class Teleop_StraightWheels_TankDrive extends OpMode
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         leftMotorFront  = hardwareMap.get(DcMotor.class, "leftMotorFront");
-        leftMotorMiddle  = hardwareMap.get(DcMotor.class, "leftMotorRear");
+        //leftMotorMiddle  = hardwareMap.get(DcMotor.class, "leftMotorRear");
         leftMotorRear  = hardwareMap.get(DcMotor.class, "leftMotorRear");
 
         rightMotorFront = hardwareMap.get(DcMotor.class, "rightMotorFront");
-        rightMotorMiddle = hardwareMap.get(DcMotor.class, "rightMotorMiddle");
+        //rightMotorMiddle = hardwareMap.get(DcMotor.class, "rightMotorMiddle");
         rightMotorRear = hardwareMap.get(DcMotor.class, "rightMotorRear");
 
 
@@ -87,8 +86,8 @@ public class Teleop_StraightWheels_TankDrive extends OpMode
         // Reverse the motor that runs backwards when connected directly to the battery
         leftMotorFront.setDirection(DcMotor.Direction.FORWARD);
         rightMotorFront.setDirection(DcMotor.Direction.REVERSE);
-        leftMotorMiddle.setDirection(DcMotor.Direction.FORWARD);
-        rightMotorMiddle.setDirection(DcMotor.Direction.REVERSE);
+        //leftMotorMiddle.setDirection(DcMotor.Direction.FORWARD);
+        //rightMotorMiddle.setDirection(DcMotor.Direction.REVERSE);
         leftMotorRear.setDirection(DcMotor.Direction.FORWARD);
         rightMotorRear.setDirection(DcMotor.Direction.REVERSE);
 
@@ -137,14 +136,14 @@ public class Teleop_StraightWheels_TankDrive extends OpMode
 
         // Send calculated power to wheels
         leftMotorFront.setPower(leftPower);
-        leftMotorMiddle.setPower(leftPower);
+        //leftMotorMiddle.setPower(leftPower);
         leftMotorRear.setPower(leftPower);
         rightMotorFront.setPower(rightPower);
-        rightMotorMiddle.setPower(rightPower);
+        //rightMotorMiddle.setPower(rightPower);
         rightMotorRear.setPower(rightPower);
 
         // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("Status",   "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
     }
 
