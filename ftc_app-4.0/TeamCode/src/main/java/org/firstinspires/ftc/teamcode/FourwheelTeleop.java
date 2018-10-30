@@ -71,7 +71,7 @@ public class FourwheelTeleop extends OpMode
         telemetry.addData("Status", "Initialized");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
+         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         leftMotorFront  = hardwareMap.get(DcMotor.class, "leftMotorFront");
         leftMotorRear  = hardwareMap.get(DcMotor.class, "leftMotorRear");
@@ -91,7 +91,7 @@ public class FourwheelTeleop extends OpMode
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
-
+//hi how ya doing
     /*
      * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
      */
