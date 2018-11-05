@@ -29,9 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -91,29 +92,36 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * is explained below.
  */
 
-@TeleOp(name="Concept: Vuforia Rover Nav", group ="Concept")
+@TeleOp(name="Auto Red Audience", group ="Concept")
     //@Disabled
-    public class ConceptVuforiaNavRoverRuckus extends LinearOpMode {
+    public class Auto_Red_Audience extends LinearOpMode {
 
-        /*
-         * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
-         * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
-         * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
-         * web site at https://developer.vuforia.com/license-manager.
-         *
-         * Vuforia license keys are always 380 characters long, and look as if they contain mostly
-         * random data. As an example, here is a example of a fragment of a valid key:
-         *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
-         * Once you've obtained a license key, copy the string from the Vuforia web site
-         * and paste it in to your code on the next line, between the double quotes.
-         */
+
+    private ElapsedTime runtime = new ElapsedTime();
+    static final double COUNTS_PER_MOTOR_REV = 1680;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 4.0;     // or figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+    /*
+     * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
+     * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
+     * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
+     * web site at https://developer.vuforia.com/license-manager.
+     *
+     * Vuforia license keys are always 380 characters long, and look as if they contain mostly
+     * random data. As an example, here is a example of a fragment of a valid key:
+     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+     * Once you've obtained a license key, copy the string from the Vuforia web site
+     * and paste it in to your code on the next line, between the double quotes.
+     */
     private static final String VUFORIA_KEY = "AfFRRyH/////AAABmb6QHOtIZE6TrGJe24Gin0kkndTn8W4iKeV93VNh/+DEMbRfjix210MNGCcZqvvT62/ILpMXNQUJghRt2EP9hq27uBdJfnP2EtiRy1AZEqQqar3l/QVLkxFZFKNfkt7SjqUjyuOfFKa/bmlhXLmpo3WEO+tDVwxUW20kxvqgkryeap0FkIhNTb3uCuuGZCF0x2FO8J1Dm5Scyf8BdM6hrJfcdMemZ8p5v6T155q1EWW3IAqI6QZR3V8Bd+wjbzAA/mHIR/IFdGxtDzSHtwV2lecT/gagIvrjrsQ5cDaickzpv+Y2Wv+vARwpoQrUqf11AS0Fqdg3hqDC90tOtX6B5npiHp3B9pahqV/kxMZeCV/u";
 
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
-    private static final float mmPerInch        = 25.4f;
-    private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
-    private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
+    private static final float mmPerInch = 25.4f;
+    private static final float mmFTCFieldWidth = (12 * 6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
+    private static final float mmTargetHeight = (6) * mmPerInch;          // the height of the center of the target image above the floor
 
     // Select which camera you want use.  The FRONT camera is the one on the same side as the screen.
     // Valid choices are:  BACK or FRONT
@@ -122,13 +130,36 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
     private OpenGLMatrix lastLocation = null;
     private boolean targetVisible = false;
 
+    private DcMotor leftMotorFront = null;
+    private DcMotor rightMotorFront = null;
+    private DcMotor rightMotorRear = null;
+    private DcMotor leftMotorRear = null;
+
+    boolean targetSeen = false;
+
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
      */
     VuforiaLocalizer vuforia;
 
-    @Override public void runOpMode() {
+    @Override
+    public void runOpMode() {
+
+        leftMotorFront = hardwareMap.dcMotor.get("leftMotorFront");
+        rightMotorFront = hardwareMap.dcMotor.get("rightMotorFront");
+        rightMotorRear = hardwareMap.dcMotor.get("rightMotorRear");
+        leftMotorRear = hardwareMap.dcMotor.get("leftMotorRear");
+
+
+        // eg: Set the drive motor directions:
+        // Reverse the motor that runs backwards when connected directly to the battery
+
+        leftMotorFront.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+        leftMotorRear.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+        rightMotorFront.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        rightMotorRear.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
@@ -139,8 +170,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = VUFORIA_KEY ;
-        parameters.cameraDirection   = CAMERA_CHOICE;
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection = CAMERA_CHOICE;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -212,7 +243,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
          */
         OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
                 .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90));
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 90));
         frontCraters.setLocation(frontCratersLocationOnField);
 
         /**
@@ -250,9 +281,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
          * In this example, it is centered (left to right), but 110 mm forward of the middle of the robot, and 200 mm above ground level.
          */
 
-        final int CAMERA_FORWARD_DISPLACEMENT  = 110;   // eg: Camera is 110 mm in front of robot center
+        final int CAMERA_FORWARD_DISPLACEMENT = 110;   // eg: Camera is 110 mm in front of robot center
         final int CAMERA_VERTICAL_DISPLACEMENT = 200;   // eg: Camera is 200 mm above ground
-        final int CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
+        final int CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
@@ -260,9 +291,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
                         CAMERA_CHOICE == FRONT ? 90 : -90, 0, 0));
 
         /**  Let all the trackable listeners know where the phone is.  */
-        for (VuforiaTrackable trackable : allTrackables)
-        {
-            ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
+        for (VuforiaTrackable trackable : allTrackables) {
+            ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
         }
 
         /** Wait for the game to begin */
@@ -272,18 +302,20 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
         /** Start tracking the data sets we care about. */
         targetsRoverRuckus.activate();
-        while (opModeIsActive()) {
 
+        while (targetSeen = false) {
             // check all the trackable target to see which one (if any) is visible.
             targetVisible = false;
+
+
             for (VuforiaTrackable trackable : allTrackables) {
-                if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+                if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
                     targetVisible = true;
 
                     // getUpdatedRobotLocation() will return null if no new information is available since
                     // the last time that call was made, or if the trackable is not currently visible.
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
                     if (robotLocationTransform != null) {
                         lastLocation = robotLocationTransform;
                     }
@@ -300,12 +332,187 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            }
-            else {
+                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle,
+                        rotation.secondAngle, rotation.thirdAngle);
+                motorOff();
+                targetSeen = true;
+
+            } else {
+                driveLeft(.5);
                 telemetry.addData("Visible Target", "none");
             }
             telemetry.update();
+        }
+    }
+
+    public void motorOff() {
+
+
+        leftMotorFront.setPower(0);
+
+        rightMotorFront.setPower(0);
+
+        leftMotorRear.setPower(0);
+
+        rightMotorRear.setPower(0);
+
+    }
+    public void driveForward(double speed) {
+
+        leftMotorFront.setPower(speed);
+
+        rightMotorFront.setPower(speed);
+
+        leftMotorRear.setPower(speed);
+
+        rightMotorRear.setPower(speed);
+
+    }
+    public void driveLeft(double speed) {
+
+        leftMotorFront.setPower(-speed);
+
+        rightMotorFront.setPower(speed);
+
+        leftMotorRear.setPower(speed);
+
+        rightMotorRear.setPower(-speed);
+
+    }
+    public void driveRight(double speed) {
+
+        leftMotorFront.setPower(speed);
+
+        rightMotorFront.setPower(-speed);
+
+        leftMotorRear.setPower(-speed);
+
+        rightMotorRear.setPower(speed);
+
+    }
+    public void driveBackward(double speed) {
+
+        leftMotorFront.setPower(-speed);
+
+        rightMotorFront.setPower(-speed);
+
+        leftMotorRear.setPower(-speed);
+
+        rightMotorRear.setPower(-speed);
+
+    }
+    public void encoderDrive(double speed,
+                             double leftFrontInches, double rightFrontInches, double leftRearInches, double rightRearInches,
+                             double timeoutS) {
+
+        int newLeftFrontTarget;
+
+        int newRightFrontTarget;
+
+        int newLeftRearTarget;
+
+        int newRightRearTarget;
+
+
+        // Ensure that the opmode is still active
+
+        if (opModeIsActive()) {
+
+
+            // Determine new target position, and pass to motor controller
+
+            newLeftFrontTarget = leftMotorFront.getCurrentPosition() + (int) (leftFrontInches * COUNTS_PER_INCH);
+
+            newLeftRearTarget = leftMotorRear.getCurrentPosition() + (int) (leftRearInches * COUNTS_PER_INCH);
+
+            newRightFrontTarget = rightMotorFront.getCurrentPosition() + (int) (rightFrontInches * COUNTS_PER_INCH);
+
+            newRightRearTarget = rightMotorRear.getCurrentPosition() + (int) (rightRearInches * COUNTS_PER_INCH);
+
+            leftMotorFront.setTargetPosition(newLeftFrontTarget);
+
+            rightMotorFront.setTargetPosition(newRightFrontTarget);
+
+            leftMotorRear.setTargetPosition(newLeftRearTarget);
+
+            rightMotorRear.setTargetPosition(newRightRearTarget);
+
+
+            // Turn On RUN_TO_POSITION
+
+            leftMotorFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            rightMotorFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            leftMotorRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            rightMotorRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+            // reset the timeout time and start motion.
+
+            runtime.reset();
+            leftMotorFront.setPower(Math.abs(speed));
+
+            rightMotorFront.setPower(Math.abs(speed));
+
+            leftMotorRear.setPower(Math.abs(speed));
+
+            rightMotorRear.setPower(Math.abs(speed));
+
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+
+            while (opModeIsActive() &&
+
+                    (runtime.seconds() < timeoutS) &&
+
+                    (leftMotorFront.isBusy() && rightMotorFront.isBusy() && leftMotorRear.isBusy() && rightMotorRear.isBusy())) {
+
+
+                // Display it for the driver.
+
+                telemetry.addData("Path1", "Running to %7d :%7d", newLeftFrontTarget, newRightFrontTarget, newLeftRearTarget, newRightRearTarget);
+
+                telemetry.addData("Path2", "Running at %7d :%7d",
+
+                        leftMotorFront.getCurrentPosition(),
+
+                        rightMotorFront.getCurrentPosition(),
+
+                        leftMotorRear.getCurrentPosition(),
+
+                        rightMotorRear.getCurrentPosition());
+
+                telemetry.update();
+
+            }
+
+
+            // Stop all motion;
+
+            leftMotorFront.setPower(0);
+
+            rightMotorFront.setPower(0);
+
+            leftMotorRear.setPower(0);
+
+            rightMotorRear.setPower(0);
+
+
+            // Turn off RUN_TO_POSITION
+
+            leftMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            rightMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            leftMotorRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            rightMotorRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+            //  sleep(250);   // optional pause after each move
+
         }
     }
 }

@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Teleop Straight Wheels POV 4", group="Iterative Opmode")
 //@Disabled
-public class SixwheelTeleop extends OpMode
+public class  SixwheelTeleop extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
