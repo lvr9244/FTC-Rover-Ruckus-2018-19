@@ -320,7 +320,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
                         lastLocation = robotLocationTransform;
                     }
                     break;
-                }
+                } 
             }
 
             // Provide feedback as to where the robot is located (if we know).
