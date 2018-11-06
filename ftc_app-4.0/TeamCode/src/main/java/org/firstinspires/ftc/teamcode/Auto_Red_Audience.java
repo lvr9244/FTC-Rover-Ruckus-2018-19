@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -92,7 +93,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * is explained below.
  */
 
-@TeleOp(name="Auto Red Audience", group ="Concept")
+@Autonomous(name="Auto Red Audience", group ="Concept")
     //@Disabled
     public class Auto_Red_Audience extends LinearOpMode {
 
@@ -303,25 +304,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         /** Start tracking the data sets we care about. */
         targetsRoverRuckus.activate();
 
-        while (targetSeen = false) {
-            // check all the trackable target to see which one (if any) is visible.
-            targetVisible = false;
-
-
-            for (VuforiaTrackable trackable : allTrackables) {
-                if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
-                    telemetry.addData("Visible Target", trackable.getName());
-                    targetVisible = true;
-
-                    // getUpdatedRobotLocation() will return null if no new information is available since
-                    // the last time that call was made, or if the trackable is not currently visible.
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-                    if (robotLocationTransform != null) {
-                        lastLocation = robotLocationTransform;
-                    }
-                    break;
-                } 
-            }
+        runVuforia();
 
             // Provide feedback as to where the robot is located (if we know).
             if (targetVisible) {
@@ -336,14 +319,14 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
                         rotation.secondAngle, rotation.thirdAngle);
                 motorOff();
                 targetSeen = true;
-
             } else {
                 driveLeft(.5);
                 telemetry.addData("Visible Target", "none");
+                runVuforia();
             }
             telemetry.update();
         }
-    }
+
 
     public void motorOff() {
 
@@ -515,4 +498,36 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
         }
     }
+    public void runVuforia () {
+
+        VuforiaTrackables targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
+        VuforiaTrackable blueRover = targetsRoverRuckus.get(0);
+        blueRover.setName("Blue-Rover");
+        VuforiaTrackable redFootprint = targetsRoverRuckus.get(1);
+        redFootprint.setName("Red-Footprint");
+        VuforiaTrackable frontCraters = targetsRoverRuckus.get(2);
+        frontCraters.setName("Front-Craters");
+        VuforiaTrackable backSpace = targetsRoverRuckus.get(3);
+        backSpace.setName("Back-Space");
+
+        // For convenience, gather together all the trackable objects in one easily-iterable collection */
+        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+        allTrackables.addAll(targetsRoverRuckus);
+
+        for (VuforiaTrackable trackable : allTrackables) {
+            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+                telemetry.addData("Visible Target", trackable.getName());
+                targetVisible = true;
+
+                // getUpdatedRobotLocation() will return null if no new information is available since
+                // the last time that call was made, or if the trackable is not currently visible.
+                OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+                if (robotLocationTransform != null) {
+                    lastLocation = robotLocationTransform;
+                }
+                break;
+            }
+        }
+    }
 }
+
