@@ -500,7 +500,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         targetVisible = false;
 
         for (VuforiaTrackable trackable : allTrackables) {
-            if (( trackable.getListener()).isVisible()) {
+            if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                 telemetry.addData("Visible Target", trackable.getName());
                 targetVisible = true;
                 telemetry.addData("image", "found");

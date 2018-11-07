@@ -58,7 +58,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
     //@Disabled
     public class Auto_Red_Audience_Encoders extends LinearOpMode {
 
-
+//hello paul
     private ElapsedTime runtime = new ElapsedTime();
     static final double COUNTS_PER_MOTOR_REV = 1680;    // eg: TETRIX Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
