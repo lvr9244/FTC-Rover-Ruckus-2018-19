@@ -50,7 +50,7 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Teleop Straight Wheels POV 4", group="Iterative Opmode")
+@TeleOp(name="Teleop Straight Wheel  POV 4", group="Iterative Opmode")
 //@Disabled
 public class FourwheelTeleop extends OpMode
 {

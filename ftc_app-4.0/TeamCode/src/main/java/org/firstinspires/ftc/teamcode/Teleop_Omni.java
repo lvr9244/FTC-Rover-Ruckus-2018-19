@@ -70,28 +70,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-
 /**
-
- *
-
- *
-
- *
-
- *
-
- * FIGURE OUT ENCODERS FOR THE TURNING ARM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
- *
-
- *
-
- *
-
- *
-
  * This file contains an example of an iterative (Non-Linear) "OpMode".
 
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
@@ -118,12 +97,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 
-@TeleOp(name="TeleOp--Omni expansion Devin", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
+@TeleOp(name="TeleOp--Omni Devin", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
 
 //@Disabled1
 
 public class Teleop_Omni extends OpMode
-
 {
 
     /* Declare OpMode members. */
