@@ -30,7 +30,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -52,7 +51,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name="Teleop Straight Wheels POV 4", group="Iterative Opmode")
-@Disabled
+//@Disabled
 public class  SixwheelTeleop extends OpMode
 {
     // Declare OpMode members.

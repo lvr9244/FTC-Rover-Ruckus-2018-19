@@ -64,7 +64,6 @@ package org.firstinspires.ftc.teamcode;
 
 
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -128,7 +127,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 @TeleOp(name="TeleOp--Omni expansion Devin", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
-@Disabled
+
+//@Disabled1
 
 public class Teleop_Omni_cornerWheels_Devin extends OpMode
 

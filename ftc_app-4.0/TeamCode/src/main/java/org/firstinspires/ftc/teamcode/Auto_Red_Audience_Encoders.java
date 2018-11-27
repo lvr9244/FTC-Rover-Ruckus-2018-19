@@ -32,8 +32,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -56,17 +54,15 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="Auto Square Encoders", group ="Concept")
+@Autonomous(name="Auto Red Audience Encoders", group ="Concept")
     //@Disabled
-    public class Auto_RedS_Encoders extends LinearOpMode {
+    public class Auto_Red_Audience_Encoders extends LinearOpMode {
 
 //hello paul
     private ElapsedTime runtime = new ElapsedTime();
     static final double COUNTS_PER_MOTOR_REV = 1680;    // eg: TETRIX Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // or figuring circumference
-    double pi = 3.14159265358979;
-    double turnFourtyFive = (17.78*pi)/8;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     /*
@@ -100,9 +96,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
     private DcMotor rightMotorFront = null;
     private DcMotor rightMotorRear = null;
     private DcMotor leftMotorRear = null;
-    private DcMotor liftMotor = null;
-
-    Servo beefyArm;
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -117,11 +110,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         rightMotorFront = hardwareMap.dcMotor.get("rightMotorFront");
         rightMotorRear = hardwareMap.dcMotor.get("rightMotorRear");
         leftMotorRear = hardwareMap.dcMotor.get("leftMotorRear");
-        liftMotor = hardwareMap.dcMotor.get("liftMotor");
-
-        beefyArm = hardwareMap.servo.get("beefyArm");
-
-
 
 
         // eg: Set the drive motor directions:
@@ -131,43 +119,13 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         leftMotorRear.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightMotorFront.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         rightMotorRear.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
-        liftMotor.setDirection(DcMotor.Direction.FORWARD);
 
         telemetry.update();
         waitForStart();
 
 
-        liftMotor.setPower(.5);
-        sleep(1000);
-        liftMotor.setPower(0);
 
 
-        encoderDrive(1, -3, 3, 3, -3, 30);
-        //go forward but stop before the block things
-        encoderDrive(1, 22, 22, 22, 22, 30);
-
-        //move left to avoid block things
-        encoderDrive(1,-30, 30, 30, -30, 30);
-
-        //move forward and turn around the block things
-        encoderDrive(1, 10, 10, 10, 10, 30);
-        encoderDrive(1, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, turnFourtyFive, 30);
-
-        //move to square thing
-        encoderDrive(1, 40, 40, 40, 40, 30);
-
-        //program the beefy arm
-        sleep(2000);
-
-        //beefy arm comes out, drops beefy shark, and closes
-        beefyArm.setPosition(1);
-        sleep(1000);
-        beefyArm.setPosition(0);
-        sleep(1000);
-
-
-        //move to crater
-        encoderDrive(1, 75, -75, -75, 75, 30);
         }
 
 

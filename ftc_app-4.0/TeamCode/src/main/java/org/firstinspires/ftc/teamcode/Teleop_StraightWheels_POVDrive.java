@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -51,7 +50,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name="Teleop Straight Wheels POV", group="Iterative Opmode")
-@Disabled
+//@Disabled
 public class Teleop_StraightWheels_POVDrive extends OpMode
 {
     // Declare OpMode members.
