@@ -65,8 +65,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -112,6 +114,10 @@ public class Teleop_Omni extends OpMode
     private DcMotor rightMotorFront = null;
     private DcMotor rightMotorRear = null;
     private DcMotor leftMotorRear = null;
+    private DcMotor liftMotor = null;
+
+    CRServo ballCollector;
+    Servo beefyArm;
 
     ColorSensor colorSensor;
     boolean cutSpeed;
@@ -149,8 +155,11 @@ public class Teleop_Omni extends OpMode
         rightMotorFront = hardwareMap.dcMotor.get("rightMotorFront");
         rightMotorRear = hardwareMap.dcMotor.get("rightMotorRear");
         leftMotorRear = hardwareMap.dcMotor.get("leftMotorRear");
+        liftMotor = hardwareMap.dcMotor.get("liftMotor");
 
 
+        ballCollector = hardwareMap.crservo.get("ballCollector");
+        beefyArm = hardwareMap.servo.get("beefyArm");
         // eg: Set the drive motor directions:
         // Reverse the motor that runs backwards when connected directly to the battery
 
@@ -158,9 +167,10 @@ public class Teleop_Omni extends OpMode
         leftMotorRear.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightMotorFront.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         rightMotorRear.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        liftMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
-        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        //colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
 
 
@@ -258,13 +268,15 @@ public class Teleop_Omni extends OpMode
 
             }
 
-                if (colorSensor.red() > colorSensor.blue()){
-                    telemetry.addData("Ball", "Red");
+            liftMotor.setPower(gamepad2.right_stick_y);
 
-                } else if (colorSensor.red() < colorSensor.blue()) {
-                    telemetry.addData("Ball", "Blue");
-
-                }
+            if (gamepad2.a){
+                ballCollector.setPower(1);
+            } else if (gamepad2.b){
+                ballCollector.setPower(-1);
+            } else {
+                ballCollector.setPower(0);
+            }
     /*
 
      * Code to run ONCE after the driver hits STOP
