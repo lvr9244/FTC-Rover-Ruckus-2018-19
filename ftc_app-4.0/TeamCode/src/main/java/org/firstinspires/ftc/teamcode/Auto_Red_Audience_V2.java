@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -294,7 +293,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         for (VuforiaTrackable trackable : allTrackables) {
             ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
         }
-        //vuforiaInit();
+        vuforiaInit();
 
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
@@ -304,7 +303,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         /** Start tracking the data sets we care about. */
         targetsRoverRuckus.activate();
 
-        while (!pictureVisible){
         for (VuforiaTrackable trackable : allTrackables) {
             if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                 telemetry.addData("Visible Target", trackable.getName());
@@ -318,7 +316,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
                 telemetry.addLine("can't find image. better keep looking");
                 driveLeft(.2);
 
-            }}
+            }
             }
 
         telemetry.addData("Vuforia:", "done");
