@@ -21,7 +21,8 @@
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVERu
+ *
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -29,6 +30,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -49,18 +51,16 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Teleop Straight Wheels POV", group="Iterative Opmode")
-//@Disabled
-public class Teleop_StraightWheels_POVDrive extends OpMode
+@TeleOp(name="Teleop Straight Wheel  POV 4", group="Iterative Opmode")
+@Disabled
+public class FourwheelTeleop extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftMotorFront = null;
-    //private DcMotor leftMotorMiddle = null;
     private DcMotor leftMotorRear = null;
 
     private DcMotor rightMotorFront = null;
-    //private DcMotor rightMotorMiddle = null;
     private DcMotor rightMotorRear = null;
 
 
@@ -72,14 +72,12 @@ public class Teleop_StraightWheels_POVDrive extends OpMode
         telemetry.addData("Status", "Initialized");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
+         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         leftMotorFront  = hardwareMap.get(DcMotor.class, "leftMotorFront");
-        //leftMotorMiddle  = hardwareMap.get(DcMotor.class, "leftMotorRear");
         leftMotorRear  = hardwareMap.get(DcMotor.class, "leftMotorRear");
 
         rightMotorFront = hardwareMap.get(DcMotor.class, "rightMotorFront");
-        //rightMotorMiddle = hardwareMap.get(DcMotor.class, "rightMotorMiddle");
         rightMotorRear = hardwareMap.get(DcMotor.class, "rightMotorRear");
 
 
@@ -87,15 +85,14 @@ public class Teleop_StraightWheels_POVDrive extends OpMode
         // Reverse the motor that runs backwards when connected directly to the battery
         leftMotorFront.setDirection(DcMotor.Direction.FORWARD);
         rightMotorFront.setDirection(DcMotor.Direction.REVERSE);
-        //leftMotorMiddle.setDirection(DcMotor.Direction.FORWARD);
-        //rightMotorMiddle.setDirection(DcMotor.Direction.REVERSE);
+
         leftMotorRear.setDirection(DcMotor.Direction.FORWARD);
         rightMotorRear.setDirection(DcMotor.Direction.REVERSE);
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
     }
-
+//hi how ya doing
     /*
      * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
      */
@@ -137,10 +134,8 @@ public class Teleop_StraightWheels_POVDrive extends OpMode
 
         // Send calculated power to wheels
         leftMotorFront.setPower(leftPower);
-        //leftMotorMiddle.setPower(leftPower);
         leftMotorRear.setPower(leftPower);
         rightMotorFront.setPower(rightPower);
-        //rightMotorMiddle.setPower(rightPower);
         rightMotorRear.setPower(rightPower);
 
         // Show the elapsed game time and wheel power.

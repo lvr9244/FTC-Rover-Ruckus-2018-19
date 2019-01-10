@@ -32,37 +32,28 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
-import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="Auto Red Audience Encoders", group ="Concept")
+@Autonomous(name="Auto Crater Encoders Depot", group ="Concept")
     //@Disabled
-    public class Auto_Red_Audience_Encoders extends LinearOpMode {
+    public class Auto_RedC_Encoders_Depot extends LinearOpMode {
 
 //hello paul
     private ElapsedTime runtime = new ElapsedTime();
     static final double COUNTS_PER_MOTOR_REV = 1680;    // eg: TETRIX Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // or figuring circumference
+    double pi = 3.14159265358979;
+    double turnFourtyFive = (15.78*pi)/8;
+    double turnNinety = (17.78*pi)/4;
+    double turn180 = (17.78*pi)/2;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     /*
@@ -96,6 +87,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
     private DcMotor rightMotorFront = null;
     private DcMotor rightMotorRear = null;
     private DcMotor leftMotorRear = null;
+    private DcMotor liftMotor = null;
+
+    Servo beefyArm;
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -110,6 +104,11 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         rightMotorFront = hardwareMap.dcMotor.get("rightMotorFront");
         rightMotorRear = hardwareMap.dcMotor.get("rightMotorRear");
         leftMotorRear = hardwareMap.dcMotor.get("leftMotorRear");
+        liftMotor = hardwareMap.dcMotor.get("liftMotor");
+
+        beefyArm = hardwareMap.servo.get("beefyArm");
+
+
 
 
         // eg: Set the drive motor directions:
@@ -119,14 +118,60 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         leftMotorRear.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightMotorFront.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         rightMotorRear.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        liftMotor.setDirection(DcMotor.Direction.FORWARD);
 
         telemetry.update();
         waitForStart();
 
+        //unhook off the lander
+        liftMotor.setPower(-1);
+        sleep(500);
+        liftMotor.setPower(0);
+
+        telemetry.addLine("motor moved down");
+        telemetry.update();
+        sleep(2000);
+
+        //unhook ourselves
+        encoderDrive(1, -5, 5, 5, -5, 30);
+        liftMotor.setPower(1);
+        sleep(300);
+        liftMotor.setPower(0);
+        encoderDrive(1, -3, 3, 3, -3, 30);
+        //go forward but stop before the block things
+//go forward but stop before the block things
+        encoderDrive(1, 15, 15, 15, 15, 30);
+
+        //move left to avoid block things
+        encoderDrive(1,-35, 35, 35, -35, 30);
+
+        encoderDrive(1, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, turnFourtyFive, 30);
+
+        encoderDrive(1, -10, 10, 10, -10, 30);
+
+        encoderDrive(1, -70, -70, -70, -70, 30);
 
 
+        //sleep(2000);
 
-        }
+        //beefy arm comes out, drops beefy shark, and closes
+        beefyArm.setPosition(1);
+        sleep(1000);
+        encoderDrive(1, 5, 5, 5, 5, 1);
+
+
+        //encoderDrive(1, turn180, -turn180, turn180, -turn180, 30);
+
+
+        //move to crater
+        encoderDrive(1, 70, 70, 70, 70, 75);
+        beefyArm.setPosition(0);
+        sleep(500);
+        //encoderDrive(1, 5, 5, 5, 5, 30);
+        //encoderDrive(1, -35, 35, 35, -35, 30);
+
+
+    }
 
 
     public void motorOff() {
@@ -190,46 +235,32 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
                              double timeoutS) {
 
         int newLeftFrontTarget;
-
         int newRightFrontTarget;
-
         int newLeftRearTarget;
-
         int newRightRearTarget;
 
-
         // Ensure that the opmode is still active
-
         if (opModeIsActive()) {
 
 
             // Determine new target position, and pass to motor controller
 
             newLeftFrontTarget = leftMotorFront.getCurrentPosition() + (int) (leftFrontInches * COUNTS_PER_INCH);
-
             newLeftRearTarget = leftMotorRear.getCurrentPosition() + (int) (leftRearInches * COUNTS_PER_INCH);
-
             newRightFrontTarget = rightMotorFront.getCurrentPosition() + (int) (rightFrontInches * COUNTS_PER_INCH);
-
             newRightRearTarget = rightMotorRear.getCurrentPosition() + (int) (rightRearInches * COUNTS_PER_INCH);
 
             leftMotorFront.setTargetPosition(newLeftFrontTarget);
-
             rightMotorFront.setTargetPosition(newRightFrontTarget);
-
             leftMotorRear.setTargetPosition(newLeftRearTarget);
-
             rightMotorRear.setTargetPosition(newRightRearTarget);
 
 
             // Turn On RUN_TO_POSITION
 
             leftMotorFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             rightMotorFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             leftMotorRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             rightMotorRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
@@ -237,65 +268,44 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
             runtime.reset();
             leftMotorFront.setPower(Math.abs(speed));
-
             rightMotorFront.setPower(Math.abs(speed));
-
             leftMotorRear.setPower(Math.abs(speed));
-
             rightMotorRear.setPower(Math.abs(speed));
 
 
             // keep looping while we are still active, and there is time left, and both motors are running.
 
             while (opModeIsActive() &&
-
                     (runtime.seconds() < timeoutS) &&
-
                     (leftMotorFront.isBusy() && rightMotorFront.isBusy() && leftMotorRear.isBusy() && rightMotorRear.isBusy())) {
 
-
                 // Display it for the driver.
-
                 telemetry.addData("Path1", "Running to %7d :%7d", newLeftFrontTarget, newRightFrontTarget, newLeftRearTarget, newRightRearTarget);
-
                 telemetry.addData("Path2", "Running at %7d :%7d",
 
                         leftMotorFront.getCurrentPosition(),
-
                         rightMotorFront.getCurrentPosition(),
-
                         leftMotorRear.getCurrentPosition(),
-
                         rightMotorRear.getCurrentPosition());
 
                 telemetry.update();
 
             }
 
-
             // Stop all motion;
 
             leftMotorFront.setPower(0);
-
             rightMotorFront.setPower(0);
-
             leftMotorRear.setPower(0);
-
             rightMotorRear.setPower(0);
 
-
             // Turn off RUN_TO_POSITION
-
             leftMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
             rightMotorFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
             leftMotorRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
             rightMotorRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-
-            //  sleep(250);   // optional pause after each move
+            sleep(200);   // optional pause after each move
 
         }
     }
