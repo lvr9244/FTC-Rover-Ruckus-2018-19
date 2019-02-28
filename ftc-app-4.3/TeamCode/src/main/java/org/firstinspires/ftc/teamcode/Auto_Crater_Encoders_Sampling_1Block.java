@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -57,9 +56,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="Auto Square Encoders Sampling 1 block", group ="Concept")
+@Autonomous(name="Auto Crater Encoders Sampling", group ="Concept")
 //@Disabled
-    public class Auto_RedS_Encoders_SamplingV3_1Block extends LinearOpMode {
+    public class Auto_Crater_Encoders_Sampling_1Block extends LinearOpMode {
 
 //hello paul
     private ElapsedTime runtime = new ElapsedTime();
@@ -67,7 +66,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
     static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // or figuring circumference
     double pi = 3.14159265358979;
-    double turnFourtyFive = (15.78*pi)/8;
+    double turnFourtyFive = (15.90*pi)/8;
     double turnNinety = (17.78*pi)/4;
     double turn180 = (17.78*pi)/2;
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
@@ -88,6 +87,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
     boolean goldRight = false;
     boolean goldMiddle = false;
     boolean lockLiftMotor = false;
+    boolean scanOne = false;
+    boolean scanTwo = false;
+
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
      * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
@@ -235,28 +237,37 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
+            telemetry.addLine("tFod activated");
         } else {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
         telemetry.update();
+
+
+
+        //Start actual game code
         waitForStart();
 
+
+        //this next sequence drops the robot down
         liftMotor.setPower(-1);
         sleep(500);
         liftMotor.setPower(0);
 
         telemetry.addLine("motor moved down");
         telemetry.update();
-        sleep(3000);
+        sleep(2000);
 
         //unhook ourselves
         encoderDrive(1, -5, 5, 5, -5, 30);
         liftMotor.setPower(1);
         sleep(300);
         liftMotor.setPower(0);
-        encoderDrive(1, -3, 3, 3, -3, 30);
-        encoderDrive(1, 2, 2, 2, 2, 30);
-        encoderDrive(1, -8, 8, 8, -8, 30);
+        encoderDrive(1, -5, 5, 5, -5, 30);
+        encoderDrive(1, 10, 10, 10, 10 , 30);
+        encoderDrive(1, 8, -8, -8, 8, 30);
+
+        //encoderDrive(1, -8, 8, 8, -8, 30);
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
@@ -272,25 +283,109 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
                 sleep(500);
             }
 
-            //this will make one of three booleans true, allowing us to determine where the gold block is
-            runTfod();
+            //this is our first scan. until we declare scanOne = true (a ball was seen) the loop will continue.
+
+            while (!scanOne){
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                         if (updatedRecognitions.size() == 1) {
+                            telemetry.addLine("Object Detected");
+                            motorOff();
+                            telemetry.update();
+                            sleep(500);
+                            for (Recognition recognition : updatedRecognitions) {
+                                //if gold is found, then the mineralFound = true. this will prevent the robot from doing a second
+                                //scan, as it isn't necessary.
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                    telemetry.addData("Gold Found", ".");
+                                    goldMiddle = true;
+                                    mineralFound = true;
+                                    scanOne = true;
+                                    telemetry.addLine("mineral found true");
+
+                                } else {
+                                    telemetry.addLine("Silver Found");
+                                    scanOne = true;
+                                }
+                            }
+                        } //here, if a ball is not seen, we move very slowly to the left until we recognize a ball.
+                        else {
+                            driveRight(.1);
+                        }
+                    }
+                }
+            } telemetry.addLine("First scan done");
+            telemetry.update();
+            sleep(100);
 
         }
-        sleep(1000);
 
+        //this is scan two. if we do not find a gold block from the first scan, we will do a second scan on the far right ball
+        if (!mineralFound){
+            encoderDrive(1, 14, -14, -14, 14  , 30);
+            while (!scanTwo){
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        if (updatedRecognitions.size() == 1) {
+                            telemetry.addLine("Object Detected");
+                            motorOff();
+                            telemetry.update();
+                            sleep(500);
+                            for (Recognition recognition : updatedRecognitions) {
+                                //if gold is found, then the mineralFound = true. this will prevent the robot from doing a second
+                                //scan, as it isn't necessary.
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                    telemetry.addData("Gold Found", ".");
+                                    goldRight = true;
+                                    mineralFound = true;
+                                    scanTwo = true;
+                                    telemetry.addLine("mineral found true");
+
+                                } else {
+                                    telemetry.addLine("Silver Found");
+                                    scanTwo = true;
+                                    goldLeft = true;
+                                }
+                            }
+                        } //here, if a ball is not seen, we move very slowly to the left until we recognize a ball.
+                        else {
+                            driveRight(.1);
+                        }
+                    }
+                }
+            }
+        }
+
+        sleep(500);
         //using the booleans given by runTfod, sample the gold block and move to depot
         if (goldLeft){
-            encoderDrive(1, 45, 45, 45, 45, 45);
+            encoderDrive(1, -25, 25, 25, -25, 30);
+            encoderDrive(1, 20, 20, 20, 20, 45);
+            encoderDrive(1, -10, -10, -10, -10, 45);
+            encoderDrive(1, -45, 45, 45, -45, 30);
             encoderDrive(1, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, turnFourtyFive, 30);
-            encoderDrive(1, 10, 10, 10, 10, 30);
 
         } else if (goldMiddle){
-            encoderDrive(1, 60, 60, 60, 60, 45);
+            encoderDrive(1, 20, 20, 20, 20, 45);
+            encoderDrive(1, -10, -10, -10, -10, 45);
+            encoderDrive(1, -70, 70, 70, -70, 30);
             encoderDrive(1, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, turnFourtyFive, 30);
 
         } else if (goldRight){
-            encoderDrive(1, 10, -10, -10, 10, 30);
-            encoderDrive(1, 45, 45, 45, 45, 45);
+            //encoderDrive(1, 10, -10, -10, 10, 30);
+            encoderDrive(1, 20, 20, 20, 20, 45);
+            encoderDrive(1, -10, -10, -10, -10, 45);
+            encoderDrive(1, -70, 70, 70, -70, 30);
+            encoderDrive(1, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, turnFourtyFive, 30);
+
         } else {
             encoderDrive(1, 45, 45, 45, 45, 45);
             encoderDrive(1, turnFourtyFive, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, 30);
@@ -298,8 +393,10 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         }
 
         //the robot spins around so the beefy arm is facing into the depot
-        encoderDrive(1, turn180, -turn180, turn180, -turn180, 30);
+        //encoderDrive(1, turn180, -turn180, turn180, -turn180, 30);
         //encoderDrive(1,8, -8, -8, 8, 30);
+
+        encoderDrive(1, -40,-40,-40,-40,20);
 
 
         //beefy arm comes out, drops beefy shark, and closes
@@ -310,15 +407,16 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
         beefyArm.setPosition(0);
         sleep(500);
 
-        encoderDrive(1, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, turnFourtyFive, 30);
+        // encoderDrive(1, -turnFourtyFive, turnFourtyFive, -turnFourtyFive, turnFourtyFive, 30);
 
         //encoderDrive(1, turn180, -turn180, turn180, -turn180, 30);
 
+        encoderDrive(1, 50, 50, 50, 50, 20);
 
         //move to crater
-        encoderDrive(1, -55, 55, 55, -55, 75);
+        //encoderDrive(1, -55, 55, 55, -55, 75);
         //encoderDrive(1, 5, 5, 5, 5, 30);
-        encoderDrive(1, -35, 35, 35, -35, 30);
+        //encoderDrive(1, -35, 35, 35, -35, 30);
 
         //turn so we can climb over the crater
         //encoderDrive(1, -turnNinety, turnNinety, -turnNinety, turnNinety, 30);
@@ -489,6 +587,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
                             telemetry.addData("Gold Found", ".");
                             goldLeft = true;
                             mineralFound = true;
+                            telemetry.addLine("mineral found true");
 
                         } else{
                             encoderDrive(1, 5, -5, -5, 5, 30);

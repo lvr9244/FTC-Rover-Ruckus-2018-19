@@ -63,22 +63,23 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.teamcode;
 
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import static java.lang.Thread.sleep;
 
-@TeleOp(name="TeleOp--Omni Devin Use This", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
 
-//@Disabled1
+@TeleOp(name="TeleOp--Omni Devin with gyro", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
 
-public class Teleop_Omni extends OpMode
+//@Disabled
+
+public class Teleop_Omni_w_Gyro extends OpMode
 {
 
     /* Declare OpMode members. */
@@ -91,10 +92,9 @@ public class Teleop_Omni extends OpMode
     private DcMotor leftMotorRear = null;
     private DcMotor liftMotor = null;
     private DcMotor liftLock = null;
-    private DcMotor ballPivot = null;
-    private DcMotor ballExtend = null;
+    private DcMotor ballCollector = null;
+    private DcMotor ballLift = null;
     Servo beefyArm;
-    Servo ballCup;
 
     ColorSensor colorSensor;
     boolean cutSpeed;
@@ -105,7 +105,6 @@ public class Teleop_Omni extends OpMode
     double horizontal; // variable for horizontal movement
     double vertical; // variable for vertical movement
     double rotational; // variable for rotational movement
-    double cupPosition = 0;
 
     //sometimes, the trigger doesn't fully register that it is not being pressed, and it gives back a very small
     //number that will drain the motor. The deadzone prevents this. Any value than the deadzone value will be ignored.
@@ -119,15 +118,16 @@ public class Teleop_Omni extends OpMode
     // sometimes it helps to multiply the raw RGB values with a scale factor
     // to amplify/attentuate the measured values.
     final double SCALE_FACTOR = 255;
+    IntegratingGyroscope gyro;
+    ModernRoboticsI2cGyro modernRoboticsI2cGyro;
+
+    // A timer helps provide feedback while calibration is taking place
+    ElapsedTime timer = new ElapsedTime();
 
     /*
-
      * Code to run ONCE when the driver hits INIT
-
      */
-
     @Override
-
     public void init() {
 
         telemetry.addData("Status", "Initialized");
@@ -140,12 +140,11 @@ public class Teleop_Omni extends OpMode
         leftMotorRear = hardwareMap.dcMotor.get("leftMotorRear");
         liftMotor = hardwareMap.dcMotor.get("liftMotor");
         liftLock = hardwareMap.dcMotor.get("liftLock");
-        ballPivot = hardwareMap.dcMotor.get("ballPivot");
-        ballExtend = hardwareMap.dcMotor.get("ballExtend");
 
 
+        ballCollector = hardwareMap.dcMotor.get("ballCollector");
+        ballLift = hardwareMap.dcMotor.get("ballLift");
         beefyArm = hardwareMap.servo.get("beefyArm");
-        ballCup = hardwareMap.servo.get("ballCup");
         // eg: Set the drive motor directions:
         // Reverse the motor that runs backwards when connected directly to the battery
 
@@ -156,6 +155,13 @@ public class Teleop_Omni extends OpMode
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
+        // Get a reference to a Modern Robotics gyro object. We use several interfaces
+        // on this object to illustrate which interfaces support which functionality.
+        modernRoboticsI2cGyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+        gyro = (IntegratingGyroscope)modernRoboticsI2cGyro;
+        // If you're only interested int the IntegratingGyroscope interface, the following will suffice.
+        // gyro = hardwareMap.get(IntegratingGyroscope.class, "gyro");
+        // A similar approach will work for the Gyroscope interface, if that's all you need.
         //colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
 
@@ -188,6 +194,26 @@ public class Teleop_Omni extends OpMode
     @Override
     public void start() {
         runtime.reset();
+
+        boolean lastResetState = false;
+        boolean curResetState  = false;
+
+
+
+        // Start calibrating the gyro. This takes a few seconds and is worth performing
+        // during the initialization phase at the start of each opMode.
+        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+        modernRoboticsI2cGyro.calibrate();
+
+        // Wait until the gyro calibration is complete
+        timer.reset();
+        while (modernRoboticsI2cGyro.isCalibrating())  {
+            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
+            telemetry.update();
+        }
+
+        telemetry.log().clear(); telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear(); telemetry.update();
     }
 
     /*
@@ -216,7 +242,7 @@ public class Teleop_Omni extends OpMode
         telemetry.addData("Right Stick X", gamepad1.right_stick_x);
 
 
-        //the bumpers allow the driver to cut the0  speed of the robot in order to provide more control
+        //the triggers allow the driver to cut the speed of the robot in order to provide more control
         if (gamepad1.left_bumper && !cutSpeed){
             cutSpeed = true;
 
@@ -255,11 +281,9 @@ public class Teleop_Omni extends OpMode
 
 */
         liftMotor.setPower(gamepad2.right_stick_y);
+        ballLift.setPower(gamepad2.left_stick_y);
 
 
-
-        //the lockLiftLock boolean is what causes the solonoid to jut out, locking our lift mechanism and preventing the robot
-        //from falling down.
         if(gamepad1.b){
             lockLiftLock = true;
         } else if (gamepad1.a){
@@ -273,38 +297,21 @@ public class Teleop_Omni extends OpMode
         }
 
 
-        //the ball extend is what extends the blue cup out and in
-        if(gamepad2.dpad_down){
-            ballExtend.setPower(-.3);
-        } else if (gamepad2.dpad_up){
-            ballExtend.setPower(.3);
-        } else{
-            ballExtend.setPower(0);
+
+        if (gamepad2.left_trigger > deadZone){
+            ballCollector.setPower(-gamepad2.left_trigger);
+
+        } else if (gamepad2.right_trigger > deadZone){
+            ballCollector.setPower(gamepad2.right_trigger);
+
+        } else {
+            ballCollector.setPower(0);
         }
-
-        telemetry.addData("sensor position", ballCup.getPosition());
-
-        //the ball pivot tilts the ball pickup up and down
-        ballPivot.setPower(gamepad2.left_stick_y/3);
-
-        //this next sequence is for the ball cup. when y is pressed, the cup rotates clockwise. when a is pressed, the cup rotates
-        //counterclockwise. eventually we want to integrate a gyro sensor so the adjustments happen automatically
-        while(gamepad2.y){
-            ballCup.setPosition(1);
-
-        }
-        while(gamepad2.a){
-            ballCup.setPosition(0);
-        }
-            ballCup.setPosition(.475);
-
-
 
         /*
          * Code to run ONCE after the driver hits STOP
          */
     }
-
     @Override
     public void stop () {
 

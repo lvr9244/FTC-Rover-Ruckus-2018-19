@@ -130,7 +130,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
         telemetry.addLine("motor moved down");
         telemetry.update();
-        sleep(2000);
+        sleep(1500);
 
         //unhook ourselves
         encoderDrive(1, -5, 5, 5, -5, 30);
@@ -164,7 +164,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 
         //move to crater
-        encoderDrive(1, 70, 70, 70, 70, 75);
+        encoderDrive(1, 80, 80, 80, 80, 75);
         beefyArm.setPosition(0);
         sleep(500);
         //encoderDrive(1, 5, 5, 5, 5, 30);
